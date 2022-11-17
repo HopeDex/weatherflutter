@@ -4,6 +4,7 @@ import 'package:flutter_glow/flutter_glow.dart';
 import './dataset.dart';
 import './detailPage.dart';
 import './extraWeather.dart';
+import 'package:geolocator/geolocator.dart';
 
 Weather currentTemp;
 Weather tomorrowTemp;
@@ -12,38 +13,58 @@ List<Weather> sevenDay;
 String lat = "53.9006";
 String lon = "27.5590";
 String city = "Minisk";
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  Position _currentPosition;
+  String _currentAddress;
 
-  getData() async{
-    fetchData(lat, lon, city).then((value){
+  final Geolocator geolocator = Geolocator();
+  getData() async {
+    fetchData(lat, lon, city).then((value) {
       currentTemp = value[0];
       todayWeather = value[1];
       tomorrowTemp = value[2];
       sevenDay = value[3];
-      setState(() {
-        
-      });
+      setState(() {});
     });
   }
 
-@override
-void initState() { 
-  super.initState();
-  getData();
-}
+  @override
+  void initState() {
+    super.initState();
+    getData();
+    _getCurrentLocation();
+    lat = _currentPosition?.latitude ?? "";
+    lon = _currentPosition?.longitude ?? "";
+  }
+
+  _getCurrentLocation() {
+    Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+      });
+    }).catchError((e) {
+      print(e);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xff030317),
-      body: currentTemp==null ? Center(child: CircularProgressIndicator(),):Column(
-        children: [CurrentWeather(getData), TodayWeather()],
-      ),
+      body: currentTemp == null
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : Column(
+              children: [CurrentWeather(getData), TodayWeather()],
+            ),
     );
   }
 }
@@ -56,19 +77,18 @@ class CurrentWeather extends StatefulWidget {
 }
 
 class _CurrentWeatherState extends State<CurrentWeather> {
-
-bool searchBar = false;
-bool updating = false;
-var focusNode = FocusNode();
+  bool searchBar = false;
+  bool updating = false;
+  var focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
-        if(searchBar)
-        setState(() {
-          searchBar = false;
-        });
+      onTap: () {
+        if (searchBar)
+          setState(() {
+            searchBar = false;
+          });
       },
       child: GlowContainer(
         height: MediaQuery.of(context).size.height - 230,
@@ -82,77 +102,76 @@ var focusNode = FocusNode();
         child: Column(
           children: [
             Container(
-              child: searchBar?
-              TextField(
-                focusNode: focusNode,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  fillColor: Color(0xff030317),
-                  filled: true,
-                  hintText:"Enter a city Name"
-                ),
-                textInputAction: TextInputAction.search,
-                onSubmitted: (value)async{
-                  CityModel temp = await fetchCity(value);
-                  if(temp==null){
-                    showDialog(context: context, builder: (BuildContext context){
-                      return AlertDialog(
-                        backgroundColor: Color(0xff030317),
-                        title:Text("City not found"),
-                        content: Text("Please check the city name"),
-                        actions: [
-                          TextButton(onPressed: (){
-                            Navigator.of(context).pop();
-                          }, child: Text("Ok"))
-                        ],
-                      );
-                    });
-                    searchBar = false;
-                    return;
-                  }
-                  city = temp.name;
-                  lat = temp.lat;
-                  lon = temp.lon;
-                  updating = true;
-                  setState(() {
-                    
-                  });
-                  widget.updateData();
-                  searchBar = false;
-                  updating = false;
-                  setState(() {
-                    
-                  });
-                },
-              )
-              :Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Icon(
-                    CupertinoIcons.square_grid_2x2,
-                    color: Colors.white,
-                  ),
-                  Row(
-                    children: [
-                      Icon(CupertinoIcons.map_fill, color: Colors.white),
-                      GestureDetector(
-                        onTap: (){
-                          searchBar = true;
-                          setState(() {
-                            
-                          });
-                          focusNode.requestFocus();
-                        },
-                        child: Text(
-                          " " + city,
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+              child: searchBar
+                  ? TextField(
+                      focusNode: focusNode,
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          fillColor: Color(0xff030317),
+                          filled: true,
+                          hintText: "Enter a city Name"),
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (value) async {
+                        CityModel temp = await fetchCity(value);
+                        if (temp == null) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  backgroundColor: Color(0xff030317),
+                                  title: Text("City not found"),
+                                  content: Text("Please check the city name"),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("Ok"))
+                                  ],
+                                );
+                              });
+                          searchBar = false;
+                          return;
+                        }
+                        city = temp.name;
+                        lat = temp.lat;
+                        lon = temp.lon;
+                        updating = true;
+                        setState(() {});
+                        widget.updateData();
+                        searchBar = false;
+                        updating = false;
+                        setState(() {});
+                      },
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(
+                          CupertinoIcons.square_grid_2x2,
+                          color: Colors.white,
                         ),
-                      ),
-                    ],
-                  ),
-                  Icon(Icons.more_vert, color: Colors.white)
-                ],
-              ),
+                        Row(
+                          children: [
+                            Icon(CupertinoIcons.map_fill, color: Colors.white),
+                            GestureDetector(
+                              onTap: () {
+                                searchBar = true;
+                                setState(() {});
+                                focusNode.requestFocus();
+                              },
+                              child: Text(
+                                " " + city,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 30),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Icon(Icons.more_vert, color: Colors.white)
+                      ],
+                    ),
             ),
             Container(
               margin: EdgeInsets.only(top: 10),
@@ -161,7 +180,7 @@ var focusNode = FocusNode();
                   border: Border.all(width: 0.2, color: Colors.white),
                   borderRadius: BorderRadius.circular(30)),
               child: Text(
-                updating?"Updating":"Updated",
+                updating ? "Updating" : "Updated",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -233,7 +252,7 @@ class TodayWeather extends StatelessWidget {
                 onTap: () {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (BuildContext context) {
-                    return DetailPage(tomorrowTemp,sevenDay);
+                    return DetailPage(tomorrowTemp, sevenDay);
                   }));
                 },
                 child: Row(

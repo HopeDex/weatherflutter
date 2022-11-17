@@ -30,6 +30,7 @@ android {
     ndkVersion flutter.ndkVersion
 
     compileOptions {
+        compileSdkVersion 33compileSdkVersion 33
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
