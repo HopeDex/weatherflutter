@@ -15,7 +15,7 @@ String lat = "53.9006";
 String lon = "27.5590";
 String city = "Minisk";
 var colorb = Color.fromARGB(255, 151, 191, 224);
-var colora = Color.fromARGB(255, 2, 0, 116);
+var colora = Color.fromARGB(255, 85, 83, 198);
 
 class HomePage extends StatefulWidget {
   @override
@@ -70,15 +70,17 @@ class _CurrentWeatherState extends State<CurrentWeather> {
   bool searchBar = false;
   bool updating = false;
   var focusNode = FocusNode();
-  var customIcon, customSearchBar;
+  Icon customIcon = const Icon(Icons.search);
+  Widget customSearchBar = const Text('My Personal Journal');
 
   @override
   Widget build(BuildContext context) {
-    if (currentTemp.name == "Snow") {
-      colorb = Colors.blue[100];
-      colora = Color.fromARGB(255, 2, 0, 116);
-    } else if (currentTemp.current < 25) {
-      colorb = Colors.green[200];
+    if (currentTemp.name.toLowerCase() == "snow") {
+      colorb = Color.fromARGB(255, 141, 231, 238);
+      colora = Color.fromARGB(255, 6, 243, 239);
+    } else if (currentTemp.current > 25) {
+      colorb = Color.fromARGB(255, 244, 168, 27);
+      colora = Color.fromARGB(255, 198, 56, 21);
     }
     return Expanded(
       child: Container(
@@ -99,30 +101,77 @@ class _CurrentWeatherState extends State<CurrentWeather> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_pin,
-                        size: 40,
-                      ),
-                      Text(
-                        city,
-                        style: TextStyle(color: Colors.black, fontSize: 24),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        if (customIcon.icon == Icons.search) {
-                          // Perform set of instructions.
-                        } else {
-                          customIcon = const Icon(Icons.search);
-                          customSearchBar = const Text('My Personal Journal');
-                        }
-                      });
-                    },
-                    icon: Icon(Icons.search, size: 30),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: searchBar
+                        ? TextField(
+                            focusNode: focusNode,
+                            decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                fillColor: Color(0xff030317),
+                                filled: true,
+                                hintText: "Enter a city Name"),
+                            textInputAction: TextInputAction.search,
+                            onSubmitted: (value) async {
+                              CityModel temp = await fetchCity(value);
+                              if (temp == null) {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        backgroundColor: Color(0xff030317),
+                                        title: Text("City not found"),
+                                        content:
+                                            Text("Please check the city name"),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Text("Ok"))
+                                        ],
+                                      );
+                                    });
+                                searchBar = false;
+                                return;
+                              }
+                              city = temp.name;
+                              lat = temp.lat;
+                              lon = temp.lon;
+                              updating = true;
+                              setState(() {});
+                              widget.updateData();
+                              searchBar = false;
+                              updating = false;
+                              setState(() {});
+                            },
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.location_pin, color: Colors.white),
+                                  GestureDetector(
+                                    onTap: () {
+                                      searchBar = true;
+                                      setState(() {});
+                                      focusNode.requestFocus();
+                                    },
+                                    child: Text(
+                                      " " + city,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 30),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Icon(Icons.expand_circle_down,
+                                  color: Colors.white)
+                            ],
+                          ),
                   ),
                 ],
               ),
