@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 class Weather {
   final int max, min, wind, chanceRain, humidity, current;
-  final String name, day, image, time, location;
+  final String name, day, image, time, location, note;
   
 
   Weather(
@@ -19,7 +19,8 @@ class Weather {
       this.image,
       this.current,
       this.time,
-      this.location});
+      this.location,
+      this.note});
 }
 
 String appId = "53eed2d577a920f18118c4936697a8dc";
@@ -42,6 +43,8 @@ Future<List> fetchData(String lat, String lon, String city) async {
         humidity: current["humidity"]?.round() ?? 0,
         chanceRain: current["uvi"]?.round() ?? 0,
         location: city,
+       
+
         image: findIcon(current["weather"][0]["main"].toString(), true));
 
     //today weather

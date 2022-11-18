@@ -204,7 +204,7 @@ class _CurrentWeatherState extends State<CurrentWeather> {
                         Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal:
-                                  MediaQuery.of(context).size.width * 0.35),
+                                  MediaQuery.of(context).size.width * 0.2),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -221,7 +221,7 @@ class _CurrentWeatherState extends State<CurrentWeather> {
                                       fontSize: 20,
                                       fontWeight: FontWeight.w300,
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                               Row(
@@ -237,7 +237,23 @@ class _CurrentWeatherState extends State<CurrentWeather> {
                                       fontSize: 20,
                                       fontWeight: FontWeight.w300,
                                     ),
-                                  )
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.thunderstorm,
+                                    size: 30,
+                                  ),
+                                  Text(
+                                    currentTemp.chanceRain.toString() + " %",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -260,9 +276,9 @@ class _CurrentWeatherState extends State<CurrentWeather> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Today",
+                        "Today " + currentTemp.day,
                         style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold),
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       GestureDetector(
                         onTap: () {
