@@ -14,7 +14,8 @@ List<Weather> sevenDay;
 String lat = "53.9006";
 String lon = "27.5590";
 String city = "Minisk";
-var colorb = Colors.blue[100];
+var colorb = Color.fromARGB(255, 151, 191, 224);
+var colora = Color.fromARGB(255, 2, 0, 116);
 
 class HomePage extends StatefulWidget {
   @override
@@ -69,29 +70,59 @@ class _CurrentWeatherState extends State<CurrentWeather> {
   bool searchBar = false;
   bool updating = false;
   var focusNode = FocusNode();
+  var customIcon, customSearchBar;
 
   @override
   Widget build(BuildContext context) {
-    if (currentTemp.current > 4) {
-      colorb = Colors.red;
-    } else {}
+    if (currentTemp.name == "Snow") {
+      colorb = Colors.blue[100];
+      colora = Color.fromARGB(255, 2, 0, 116);
+    } else if (currentTemp.current < 25) {
+      colorb = Colors.green[200];
+    }
     return Expanded(
       child: Container(
-        color: colorb,
+        decoration: BoxDecoration(
+            gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            colorb,
+            colora,
+          ],
+        )),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    Icons.location_pin,
-                    size: 40,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_pin,
+                        size: 40,
+                      ),
+                      Text(
+                        city,
+                        style: TextStyle(color: Colors.black, fontSize: 24),
+                      ),
+                    ],
                   ),
-                  Text(
-                    city,
-                    style: TextStyle(color: Colors.black, fontSize: 24),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        if (customIcon.icon == Icons.search) {
+                          // Perform set of instructions.
+                        } else {
+                          customIcon = const Icon(Icons.search);
+                          customSearchBar = const Text('My Personal Journal');
+                        }
+                      });
+                    },
+                    icon: Icon(Icons.search, size: 30),
                   ),
                 ],
               ),
